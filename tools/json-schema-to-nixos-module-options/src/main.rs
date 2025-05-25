@@ -1,10 +1,10 @@
 use std::{env, fs, mem};
 
 use schemars::{
-    schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
+    schema::{InstanceType, Metadata, RootSchema, Schema, SchemaObject, SingleOrVec},
     visit::Visitor,
 };
-use serde_json::Value;
+use serde_json::{Map, Number, Value};
 
 fn main() {
     let mut root_schema = serde_json::from_str::<RootSchema>(
@@ -83,29 +83,56 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
                             self.output += &format!(r#""{property_name}" = mkOption {{ type = "#);
                             let optional_property = !obj_val.required.contains(property_name);
 
-                            let default_value = match property {
-                                Schema::Bool(_) => None,
-                                Schema::Object(schema_object) => schema_object
-                                    .metadata
-                                    .as_ref()
-                                    .and_then(|metadata| metadata.default.clone()),
+                            let metadata = match property {
+                                Schema::Bool(_) => Metadata::default(),
+                                Schema::Object(schema_object) => {
+                                    *schema_object.metadata.clone().unwrap_or_default()
+                                }
                             };
 
-                            if optional_property && default_value.is_none() {
+                            let property_obj = property.clone().into_object();
+
+                            let nullable = property_obj
+                                .extensions
+                                .get("nullable")
+                                .is_some_and(|e| e.as_bool().unwrap_or_default());
+
+                            if optional_property && nullable && metadata.default.is_none() {
                                 self.output += "types.nullOr (";
                             }
 
                             self.visit_schema(property);
 
-                            if optional_property && default_value.is_none() {
+                            if optional_property && nullable && metadata.default.is_none() {
                                 self.output += ")";
                             }
 
                             self.output += ";";
 
-                            if let Some(default_value) = default_value {
+                            if let Some(default_value) = metadata.default {
                                 self.output += "default = ";
                                 self.output += &json_value_to_nix_value(default_value);
+                                self.output += ";";
+                            } else if optional_property && !nullable {
+                                self.output += "default = ";
+                                self.output += &json_value_to_nix_value(
+                                    match property_obj.instance_type.unwrap() {
+                                        SingleOrVec::Single(ty) => match *ty {
+                                            InstanceType::Null => Value::Null,
+                                            InstanceType::Boolean => Value::Bool(false),
+                                            InstanceType::Object => Value::Object(Map::new()),
+                                            InstanceType::Array => Value::Array(vec![]),
+                                            InstanceType::Number => {
+                                                Value::Number(Number::from_f64(0.0).unwrap())
+                                            }
+                                            InstanceType::String => Value::String("".to_owned()),
+                                            InstanceType::Integer => {
+                                                Value::Number(Number::from_u128(0).unwrap())
+                                            }
+                                        },
+                                        SingleOrVec::Vec(_) => todo!(),
+                                    },
+                                );
                                 self.output += ";";
                             }
 

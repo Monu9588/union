@@ -186,7 +186,8 @@ in
 {
   "$schema" = mkOption { type = types.nullOr types.str; };
   "equivalent_chain_ids" = mkOption {
-    type = types.nullOr (types.listOf (types.listOf types.str));
+    type = types.listOf (types.listOf types.str);
+    default = [ ];
   };
   "modules" = mkOption { type = definitions."#/definitions/ModulesConfig"; };
   "plugins" = mkOption { type = types.listOf definitions."#/definitions/PluginConfig"; };
