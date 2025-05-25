@@ -41,40 +41,70 @@ let
     };
     "#/definitions/ModuleConfig_for_ClientBootstrapModuleInfo" = types.submodule {
       options = {
-        "config" = mkOption { type = types.attrs; };
-        "enabled" = mkOption { type = types.bool; };
+        "config" = mkOption {
+          type = types.attrs;
+          default = { };
+        };
+        "enabled" = mkOption {
+          type = types.bool;
+          default = true;
+        };
         "info" = mkOption { type = definitions."#/definitions/ClientBootstrapModuleInfo"; };
         "path" = mkOption { type = types.str; };
       };
     };
     "#/definitions/ModuleConfig_for_ClientModuleInfo" = types.submodule {
       options = {
-        "config" = mkOption { type = types.attrs; };
-        "enabled" = mkOption { type = types.bool; };
+        "config" = mkOption {
+          type = types.attrs;
+          default = { };
+        };
+        "enabled" = mkOption {
+          type = types.bool;
+          default = true;
+        };
         "info" = mkOption { type = definitions."#/definitions/ClientModuleInfo"; };
         "path" = mkOption { type = types.str; };
       };
     };
     "#/definitions/ModuleConfig_for_FinalityModuleInfo" = types.submodule {
       options = {
-        "config" = mkOption { type = types.attrs; };
-        "enabled" = mkOption { type = types.bool; };
+        "config" = mkOption {
+          type = types.attrs;
+          default = { };
+        };
+        "enabled" = mkOption {
+          type = types.bool;
+          default = true;
+        };
         "info" = mkOption { type = definitions."#/definitions/FinalityModuleInfo"; };
         "path" = mkOption { type = types.str; };
       };
     };
     "#/definitions/ModuleConfig_for_ProofModuleInfo" = types.submodule {
       options = {
-        "config" = mkOption { type = types.attrs; };
-        "enabled" = mkOption { type = types.bool; };
+        "config" = mkOption {
+          type = types.attrs;
+          default = { };
+        };
+        "enabled" = mkOption {
+          type = types.bool;
+          default = true;
+        };
         "info" = mkOption { type = definitions."#/definitions/ProofModuleInfo"; };
         "path" = mkOption { type = types.str; };
       };
     };
     "#/definitions/ModuleConfig_for_StateModuleInfo" = types.submodule {
       options = {
-        "config" = mkOption { type = types.attrs; };
-        "enabled" = mkOption { type = types.bool; };
+        "config" = mkOption {
+          type = types.attrs;
+          default = { };
+        };
+        "enabled" = mkOption {
+          type = types.bool;
+          default = true;
+        };
         "info" = mkOption { type = definitions."#/definitions/StateModuleInfo"; };
         "path" = mkOption { type = types.str; };
       };
@@ -82,26 +112,29 @@ let
     "#/definitions/ModulesConfig" = types.submodule {
       options = {
         "client" = mkOption {
-          type = types.listOf (definitions."#/definitions/ModuleConfig_for_ClientModuleInfo");
+          type = types.listOf definitions."#/definitions/ModuleConfig_for_ClientModuleInfo";
         };
         "client_bootstrap" = mkOption {
-          type = types.listOf (definitions."#/definitions/ModuleConfig_for_ClientBootstrapModuleInfo");
+          type = types.listOf definitions."#/definitions/ModuleConfig_for_ClientBootstrapModuleInfo";
         };
         "consensus" = mkOption {
-          type = types.listOf (definitions."#/definitions/ModuleConfig_for_FinalityModuleInfo");
+          type = types.listOf definitions."#/definitions/ModuleConfig_for_FinalityModuleInfo";
         };
         "proof" = mkOption {
-          type = types.listOf (definitions."#/definitions/ModuleConfig_for_ProofModuleInfo");
+          type = types.listOf definitions."#/definitions/ModuleConfig_for_ProofModuleInfo";
         };
         "state" = mkOption {
-          type = types.listOf (definitions."#/definitions/ModuleConfig_for_StateModuleInfo");
+          type = types.listOf definitions."#/definitions/ModuleConfig_for_StateModuleInfo";
         };
       };
     };
     "#/definitions/PluginConfig" = types.submodule {
       options = {
         "config" = mkOption { type = types.any; };
-        "enabled" = mkOption { type = types.bool; };
+        "enabled" = mkOption {
+          type = types.bool;
+          default = true;
+        };
         "path" = mkOption { type = types.str; };
       };
     };
@@ -121,21 +154,41 @@ let
     "#/definitions/VoyagerConfig" = types.submodule {
       options = {
         "cache" = mkOption { type = definitions."#/definitions/Config"; };
-        "ipc_client_request_timeout" = mkOption { type = definitions."#/definitions/Duration"; };
-        "metrics_endpoint" = mkOption { type = types.str; };
+        "ipc_client_request_timeout" = mkOption {
+          type = definitions."#/definitions/Duration";
+          default = {
+            "nanos" = 0;
+            "secs" = 60;
+          };
+        };
+        "metrics_endpoint" = mkOption {
+          type = types.str;
+          default = "http://localhost:4318";
+        };
         "num_workers" = mkOption { type = types.int; };
-        "optimizer_delay_milliseconds" = mkOption { type = types.int; };
+        "optimizer_delay_milliseconds" = mkOption {
+          type = types.int;
+          default = 100;
+        };
         "queue" = mkOption { type = definitions."#/definitions/QueueConfig"; };
-        "rest_laddr" = mkOption { type = types.str; };
-        "rpc_laddr" = mkOption { type = types.str; };
+        "rest_laddr" = mkOption {
+          type = types.str;
+          default = "0.0.0.0:7177";
+        };
+        "rpc_laddr" = mkOption {
+          type = types.str;
+          default = "0.0.0.0:7178";
+        };
       };
     };
   };
 in
 {
-  "$schema" = mkOption { type = types.str; };
-  "equivalent_chain_ids" = mkOption { type = types.listOf (types.listOf (types.str)); };
+  "$schema" = mkOption { type = types.nullOr types.str; };
+  "equivalent_chain_ids" = mkOption {
+    type = types.nullOr (types.listOf (types.listOf types.str));
+  };
   "modules" = mkOption { type = definitions."#/definitions/ModulesConfig"; };
-  "plugins" = mkOption { type = types.listOf (definitions."#/definitions/PluginConfig"); };
+  "plugins" = mkOption { type = types.listOf definitions."#/definitions/PluginConfig"; };
   "voyager" = mkOption { type = definitions."#/definitions/VoyagerConfig"; };
 }

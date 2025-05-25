@@ -4,6 +4,7 @@ use schemars::{
     schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
     visit::Visitor,
 };
+use serde_json::Value;
 
 fn main() {
     let mut root_schema = serde_json::from_str::<RootSchema>(
@@ -77,8 +78,35 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
                         };
                         for (property_name, property) in &mut obj_val.properties {
                             self.output += &format!(r#""{property_name}" = mkOption {{ type = "#);
+                            let optional_property = !obj_val.required.contains(property_name);
+
+                            let default_value = match property {
+                                Schema::Bool(_) => None,
+                                Schema::Object(schema_object) => schema_object
+                                    .metadata
+                                    .as_ref()
+                                    .and_then(|metadata| metadata.default.clone()),
+                            };
+
+                            if optional_property && default_value.is_none() {
+                                self.output += "types.nullOr (";
+                            }
+
                             self.visit_schema(property);
-                            self.output += ";};\n";
+
+                            if optional_property && default_value.is_none() {
+                                self.output += ")";
+                            }
+
+                            self.output += ";";
+
+                            if let Some(default_value) = default_value {
+                                self.output += "default = ";
+                                self.output += &json_value_to_nix_value(default_value);
+                                self.output += ";";
+                            }
+
+                            self.output += "};\n";
                         }
                         if writing_root {
                             self.output += "}";
@@ -124,5 +152,27 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
         }
 
         self.writing_root_object = writing_root;
+    }
+}
+
+fn json_value_to_nix_value(value: Value) -> String {
+    match value {
+        Value::Null => "null".to_owned(),
+        Value::Bool(b) => b.to_string(),
+        Value::Number(n) => n.to_string(),
+        Value::String(s) => format!(r#""{s}""#),
+        Value::Array(a) => format!(
+            "[{}]",
+            a.into_iter()
+                .map(json_value_to_nix_value)
+                .map(|v| format!("({v})"))
+                .collect::<String>()
+        ),
+        Value::Object(o) => format!(
+            "{{{}}}",
+            o.into_iter()
+                .map(|(k, v)| format!(r#""{k}" = {};"#, json_value_to_nix_value(v)))
+                .collect::<String>()
+        ),
     }
 }
