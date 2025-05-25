@@ -1,0 +1,420 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "Config",
+  "type": "object",
+  "required": ["modules", "plugins", "voyager"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "nullable": true
+    },
+    "equivalent_chain_ids": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "uniqueItems": true
+      }
+    },
+    "modules": {
+      "$ref": "#/definitions/ModulesConfig"
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PluginConfig"
+      }
+    },
+    "voyager": {
+      "$ref": "#/definitions/VoyagerConfig"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "CacheConfig": {
+      "type": "object",
+      "required": ["capacity", "time_to_idle", "time_to_live"],
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "time_to_idle": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "time_to_live": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      }
+    },
+    "ClientBootstrapModuleInfo": {
+      "type": "object",
+      "required": ["chain_id", "client_type"],
+      "properties": {
+        "chain_id": {
+          "description": "The id of the chain that this client bootstrap module provides initial state for.",
+          "type": "string"
+        },
+        "client_type": {
+          "description": "The client type that this client bootstrap module provides functionality for.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ClientModuleInfo": {
+      "type": "object",
+      "required": ["client_type", "consensus_type", "ibc_interface", "ibc_spec_id"],
+      "properties": {
+        "client_type": {
+          "description": "The client type that this client module provides functionality for.",
+          "type": "string"
+        },
+        "consensus_type": {
+          "description": "The consensus type that this client module verifies.",
+          "type": "string"
+        },
+        "ibc_interface": {
+          "description": "The IBC interface that this client module provides functionality for.",
+          "type": "string"
+        },
+        "ibc_spec_id": {
+          "description": "The IBC version that this client module provides functionality for.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Config": {
+      "type": "object",
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "#/definitions/CacheConfig"
+        }
+      }
+    },
+    "Duration": {
+      "type": "object",
+      "required": ["nanos", "secs"],
+      "properties": {
+        "nanos": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0.0
+        },
+        "secs": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        }
+      }
+    },
+    "FinalityModuleInfo": {
+      "type": "object",
+      "required": ["chain_id", "consensus_type"],
+      "properties": {
+        "chain_id": {
+          "type": "string"
+        },
+        "consensus_type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModuleConfig_for_ClientBootstrapModuleInfo": {
+      "type": "object",
+      "required": ["info", "path"],
+      "properties": {
+        "config": {
+          "default": {}
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "info": {
+          "$ref": "#/definitions/ClientBootstrapModuleInfo"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModuleConfig_for_ClientModuleInfo": {
+      "type": "object",
+      "required": ["info", "path"],
+      "properties": {
+        "config": {
+          "default": {}
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "info": {
+          "$ref": "#/definitions/ClientModuleInfo"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModuleConfig_for_FinalityModuleInfo": {
+      "type": "object",
+      "required": ["info", "path"],
+      "properties": {
+        "config": {
+          "default": {}
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "info": {
+          "$ref": "#/definitions/FinalityModuleInfo"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModuleConfig_for_ProofModuleInfo": {
+      "type": "object",
+      "required": ["info", "path"],
+      "properties": {
+        "config": {
+          "default": {}
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "info": {
+          "$ref": "#/definitions/ProofModuleInfo"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModuleConfig_for_StateModuleInfo": {
+      "type": "object",
+      "required": ["info", "path"],
+      "properties": {
+        "config": {
+          "default": {}
+        },
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "info": {
+          "$ref": "#/definitions/StateModuleInfo"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ModulesConfig": {
+      "type": "object",
+      "required": ["client", "client_bootstrap", "consensus", "proof", "state"],
+      "properties": {
+        "client": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ModuleConfig_for_ClientModuleInfo"
+          }
+        },
+        "client_bootstrap": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ModuleConfig_for_ClientBootstrapModuleInfo"
+          }
+        },
+        "consensus": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ModuleConfig_for_FinalityModuleInfo"
+          }
+        },
+        "proof": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ModuleConfig_for_ProofModuleInfo"
+          }
+        },
+        "state": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ModuleConfig_for_StateModuleInfo"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "PluginConfig": {
+      "type": "object",
+      "required": ["config", "path"],
+      "properties": {
+        "config": true,
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProofModuleInfo": {
+      "type": "object",
+      "required": ["chain_id", "ibc_spec_id"],
+      "properties": {
+        "chain_id": {
+          "type": "string"
+        },
+        "ibc_spec_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "QueueConfig": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["in-memory"]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["database_url", "type"],
+          "properties": {
+            "database_url": {
+              "type": "string"
+            },
+            "idle_timeout": {
+              "default": null,
+              "$ref": "#/definitions/Duration",
+              "nullable": true
+            },
+            "max_connections": {
+              "default": 10,
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0.0
+            },
+            "max_lifetime": {
+              "default": null,
+              "$ref": "#/definitions/Duration",
+              "nullable": true
+            },
+            "min_connections": {
+              "default": 0,
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0.0
+            },
+            "optimize_batch_limit": {
+              "default": null,
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            },
+            "retryable_error_expo_backoff_max": {
+              "default": 300.0,
+              "type": "number",
+              "format": "double"
+            },
+            "retryable_error_expo_backoff_multiplier": {
+              "default": 2.0,
+              "type": "number",
+              "format": "double"
+            },
+            "type": {
+              "type": "string",
+              "enum": ["pg-queue"]
+            }
+          }
+        }
+      ]
+    },
+    "StateModuleInfo": {
+      "type": "object",
+      "required": ["chain_id", "ibc_spec_id"],
+      "properties": {
+        "chain_id": {
+          "type": "string"
+        },
+        "ibc_spec_id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "VoyagerConfig": {
+      "type": "object",
+      "required": ["cache", "num_workers", "queue"],
+      "properties": {
+        "cache": {
+          "$ref": "#/definitions/Config"
+        },
+        "ipc_client_request_timeout": {
+          "default": {
+            "nanos": 0,
+            "secs": 60
+          },
+          "$ref": "#/definitions/Duration"
+        },
+        "metrics_endpoint": {
+          "default": "http://localhost:4318",
+          "type": "string"
+        },
+        "num_workers": {
+          "type": "integer",
+          "format": "uint16",
+          "minimum": 0.0
+        },
+        "optimizer_delay_milliseconds": {
+          "default": 100,
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "queue": {
+          "$ref": "#/definitions/QueueConfig"
+        },
+        "rest_laddr": {
+          "default": "0.0.0.0:7177",
+          "type": "string"
+        },
+        "rpc_laddr": {
+          "default": "0.0.0.0:7178",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
