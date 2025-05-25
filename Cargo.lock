@@ -7863,9 +7863,10 @@ dependencies = [
 
 [[package]]
 name = "json-schema-to-nixos-module-options"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "schemars",
+ "serde_json",
 ]
 
 [[package]]

@@ -4,9 +4,11 @@
     {
       pkgs,
       crane,
+      dbg,
       ...
     }:
     let
+
       voy-modules-list = builtins.filter (
         member:
         (pkgs.lib.hasPrefix "voyager/modules" member) || (pkgs.lib.hasPrefix "voyager/plugins" member)
@@ -133,103 +135,103 @@
                     };
                   };
                 };
-                equivalent_chain_ids = mkOption {
-                  type = types.listOf (types.listOf types.str);
-                  default = [ ];
-                };
-                voyager =
-                  let
-                    durationType = types.submodule {
-                      options = {
-                        secs = mkOption { type = types.int; };
-                        nanos = mkOption { type = types.int; };
-                      };
-                    };
-                    cacheType = types.submodule {
-                      options = {
-                        capacity = mkOption { type = types.int; };
-                        time_to_live = mkOption { type = types.int; };
-                        time_to_idle = mkOption { type = types.int; };
-                      };
-                    };
-                  in
-                  mkOption {
-                    type = types.submodule {
-                      options = {
-                        num_workers = mkOption {
-                          type = types.int;
-                        };
-                        rest_laddr = mkOption {
-                          type = types.nullOr types.str;
-                          default = null;
-                          example = "0.0.0.0:7177";
-                        };
-                        rpc_laddr = mkOption {
-                          type = types.nullOr types.str;
-                          default = null;
-                          example = "0.0.0.0:7178";
-                        };
-                        metrics_endpoint = mkOption {
-                          type = types.nullOr types.str;
-                          default = null;
-                          example = "0.0.0.0:4318";
-                        };
-                        queue = mkOption {
-                          type = types.submodule {
-                            options = {
-                              database_url = mkOption {
-                                type = types.str;
-                                default = "postgres://voyager:voyager@localhost/voyager";
-                              };
-                              max_connections = mkOption {
-                                type = types.int;
-                              };
-                              min_connections = mkOption {
-                                type = types.int;
-                              };
-                              idle_timeout = mkOption {
-                                type = types.nullOr durationType;
-                                default = null;
-                              };
-                              optimize_batch_limit = mkOption {
-                                type = types.nullOr types.int;
-                                default = null;
-                              };
-                              max_lifetime = mkOption {
-                                type = types.nullOr durationType;
-                                default = null;
-                              };
-                              retryable_error_expo_backoff_max = mkOption {
-                                type = types.nullOr types.float;
-                                default = null;
-                              };
-                              retryable_error_expo_backoff_multiplier = mkOption {
-                                type = types.nullOr types.float;
-                                default = null;
-                              };
-                            };
-                          };
-                        };
-                        optimizer_delay_milliseconds = mkOption {
-                          type = types.nullOr types.int;
-                          default = null;
-                        };
-                        ipc_client_request_timeout = mkOption {
-                          type = durationType;
-                        };
-                        cache = mkOption {
-                          type = types.submodule {
-                            options = {
-                              state = mkOption { type = cacheType; };
-                            };
-                          };
-                        };
-                      };
-                    };
-                  };
-                modules = mkOption { type = types.attrs; };
-                plugins = mkOption { type = types.listOf types.attrs; };
-              };
+                # equivalent_chain_ids = mkOption {
+                #   type = types.listOf (types.listOf types.str);
+                #   default = [ ];
+                # };
+                # voyager =
+                #   let
+                #     durationType = types.submodule {
+                #       options = {
+                #         secs = mkOption { type = types.int; };
+                #         nanos = mkOption { type = types.int; };
+                #       };
+                #     };
+                #     cacheType = types.submodule {
+                #       options = {
+                #         capacity = mkOption { type = types.int; };
+                #         time_to_live = mkOption { type = types.int; };
+                #         time_to_idle = mkOption { type = types.int; };
+                #       };
+                #     };
+                #   in
+                #   mkOption {
+                #     type = types.submodule {
+                #       options = {
+                #         num_workers = mkOption {
+                #           type = types.int;
+                #         };
+                #         rest_laddr = mkOption {
+                #           type = types.nullOr types.str;
+                #           default = null;
+                #           example = "0.0.0.0:7177";
+                #         };
+                #         rpc_laddr = mkOption {
+                #           type = types.nullOr types.str;
+                #           default = null;
+                #           example = "0.0.0.0:7178";
+                #         };
+                #         metrics_endpoint = mkOption {
+                #           type = types.nullOr types.str;
+                #           default = null;
+                #           example = "0.0.0.0:4318";
+                #         };
+                #         queue = mkOption {
+                #           type = types.submodule {
+                #             options = {
+                #               database_url = mkOption {
+                #                 type = types.str;
+                #                 default = "postgres://voyager:voyager@localhost/voyager";
+                #               };
+                #               max_connections = mkOption {
+                #                 type = types.int;
+                #               };
+                #               min_connections = mkOption {
+                #                 type = types.int;
+                #               };
+                #               idle_timeout = mkOption {
+                #                 type = types.nullOr durationType;
+                #                 default = null;
+                #               };
+                #               optimize_batch_limit = mkOption {
+                #                 type = types.nullOr types.int;
+                #                 default = null;
+                #               };
+                #               max_lifetime = mkOption {
+                #                 type = types.nullOr durationType;
+                #                 default = null;
+                #               };
+                #               retryable_error_expo_backoff_max = mkOption {
+                #                 type = types.nullOr types.float;
+                #                 default = null;
+                #               };
+                #               retryable_error_expo_backoff_multiplier = mkOption {
+                #                 type = types.nullOr types.float;
+                #                 default = null;
+                #               };
+                #             };
+                #           };
+                #         };
+                #         optimizer_delay_milliseconds = mkOption {
+                #           type = types.nullOr types.int;
+                #           default = null;
+                #         };
+                #         ipc_client_request_timeout = mkOption {
+                #           type = durationType;
+                #         };
+                #         cache = mkOption {
+                #           type = types.submodule {
+                #             options = {
+                #               state = mkOption { type = cacheType; };
+                #             };
+                #           };
+                #         };
+                #       };
+                #     };
+                #   };
+                # modules = mkOption { type = types.attrs; };
+                # plugins = mkOption { type = types.listOf types.attrs; };
+              } // ((import ./configSchema.nix) { inherit (pkgs.lib) types mkOption; });
             }
           );
         };
