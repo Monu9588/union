@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::{env, fs, mem};
 
 use schemars::{
     schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
@@ -15,7 +15,7 @@ fn main() {
 
     let mut visitor = JsonSchemaToNixosModuleOptions {
         output: String::new(),
-        at_root: true,
+        writing_root_object: true,
     };
 
     visitor.visit_root_schema(&mut root_schema);
@@ -25,12 +25,14 @@ fn main() {
 
 struct JsonSchemaToNixosModuleOptions {
     output: String,
-    at_root: bool,
+    writing_root_object: bool,
 }
 
 impl Visitor for JsonSchemaToNixosModuleOptions {
     fn visit_root_schema(&mut self, root: &mut RootSchema) {
         self.output += "{ types, mkOption }: let\ndefinitions = {";
+
+        self.writing_root_object = false;
 
         for (name, schema) in &mut root.definitions {
             self.output += &format!(r##""#/definitions/{name}" = "##);
@@ -40,7 +42,7 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
 
         self.output += "};\nin\n";
 
-        self.at_root = false;
+        self.writing_root_object = true;
 
         self.visit_schema_object(&mut root.schema);
 
@@ -57,6 +59,8 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
     }
 
     fn visit_schema_object(&mut self, schema: &mut SchemaObject) {
+        let writing_root = mem::replace(&mut self.writing_root_object, false);
+
         match (&mut schema.instance_type, &mut schema.reference) {
             (Some(instance_type), None) => match instance_type {
                 SingleOrVec::Single(ty) => match &**ty {
@@ -66,7 +70,7 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
                     }
                     InstanceType::Object => {
                         let obj_val = schema.object.as_mut().unwrap();
-                        if self.at_root {
+                        if writing_root {
                             self.output += "{";
                         } else {
                             self.output += "types.submodule { options = {";
@@ -76,7 +80,7 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
                             self.visit_schema(property);
                             self.output += ";};\n";
                         }
-                        if self.at_root {
+                        if writing_root {
                             self.output += "}";
                         } else {
                             self.output += "};}";
@@ -118,5 +122,7 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
                 todo!("{schema:#?}");
             }
         }
+
+        self.writing_root_object = writing_root;
     }
 }
