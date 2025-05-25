@@ -130,7 +130,7 @@ let
     };
     "#/definitions/PluginConfig" = types.submodule {
       options = {
-        "config" = mkOption { type = types.any; };
+        "config" = mkOption { type = types.attrs; };
         "enabled" = mkOption {
           type = types.bool;
           default = true;

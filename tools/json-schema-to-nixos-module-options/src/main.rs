@@ -52,8 +52,11 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
 
     fn visit_schema(&mut self, schema: &mut Schema) {
         match schema {
-            Schema::Bool(_) => {
-                self.output += "types.any";
+            Schema::Bool(true) => {
+                self.visit_schema_object(&mut SchemaObject::default());
+            }
+            Schema::Bool(false) => {
+                todo!("what does this even mean");
             }
             Schema::Object(obj) => self.visit_schema_object(obj),
         }
