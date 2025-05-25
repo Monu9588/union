@@ -12,8 +12,6 @@ fn main() {
     )
     .unwrap();
 
-    dbg!(&root_schema);
-
     let mut visitor = JsonSchemaToNixosModuleOptions {
         output: String::new(),
         writing_root_object: true,
@@ -46,8 +44,6 @@ impl Visitor for JsonSchemaToNixosModuleOptions {
         self.writing_root_object = true;
 
         self.visit_schema_object(&mut root.schema);
-
-        // self.output += "";
     }
 
     fn visit_schema(&mut self, schema: &mut Schema) {
